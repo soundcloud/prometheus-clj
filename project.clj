@@ -2,7 +2,7 @@
 (def build-version (or (System/getenv "BUILD_NUMBER") "local"))
 (def release-version (str feature-version "." build-version))
 
-(defproject prometheus feature-version
+(defproject com.soundcloud/prometheus-clj feature-version
   :description "Clojure wrappers for the Prometheus java client"
   :url "https://github.com/soundcloud/prometheus-clj"
 
