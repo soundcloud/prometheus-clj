@@ -1,6 +1,7 @@
 (ns prometheus.core
   (:import
     (com.matttproud.accepts Parser)
+    (java.util.concurrent TimeUnit)
     (io.prometheus.client Prometheus)
     (io.prometheus.client.metrics Summary Counter)
     (io.prometheus.client.utility.hotspot Hotspot)
@@ -32,11 +33,7 @@
       (.name "http_request_durations_milliseconds")
       (.labelNames (into-array String ["method" "status"]))
       (.documentation "A histogram of the response latency for HTTP requests (in milliseconds).")
-      (.targetQuantile 0.01, 0.001)
-      (.targetQuantile 0.10, 0.01)
-      (.targetQuantile 0.50, 0.05)
-      (.targetQuantile 0.90, 0.01)
-      (.targetQuantile 0.99, 0.001)
+      (.purgeInterval 2 TimeUnit/MINUTES)
       (.build)))
 
 (defn- record-request-metric [request-method response-status request-time]
