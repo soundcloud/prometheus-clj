@@ -13,13 +13,8 @@ compile:
 test:
 	lein midje
 
-check-deploy:
-	ifndef BUILD_NUMBER
-		$(error BUILD_NUMBER is not set)
-	endif
-
-deploy: check-deploy
-	lein deploy clojars
+deploy:
+	if test -n "$$BUILD_NUMBER"; then lein deploy clojars; else echo "BUILD_NUMBER not set!"; fi
 
 deps:
 	lein deps :tree > deps.txt
