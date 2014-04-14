@@ -8,7 +8,7 @@
             :url  "http://www.apache.org/licenses/LICENSE-2.0.txt"}
 
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [io.prometheus.client.utility/hotspot "0.0.3"]
+                 [io.prometheus.client.utility/hotspot "0.0.4"]
                  [com.matttproud.accepts/accepts "0.0.2"]]
 
   :min-lein-version "2.0.0"
