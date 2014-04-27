@@ -8,7 +8,6 @@
     (java.io StringWriter ByteArrayOutputStream ByteArrayInputStream)))
 
 (def request-counter (atom nil))
-(def request-duration-counter (atom nil))
 (def request-summary (atom nil))
 
 (defn- make-request-counter [namespace]
@@ -17,14 +16,6 @@
       (.name "http_requests_total")
       (.labelNames (into-array String ["method" "status" "path"]))
       (.documentation "A counter of the total number of HTTP requests processed.")
-      (.build)))
-
-(defn- make-request-duration-counter [namespace]
-  (-> (Counter/newBuilder)
-      (.namespace namespace)
-      (.name "http_request_durations_milliseconds_total")
-      (.labelNames (into-array String ["method" "status" "path"]))
-      (.documentation "The total amount of time Ring has spent answering HTTP requests (in milliseconds).")
       (.build)))
 
 (defn- make-request-summary [namespace]
@@ -36,39 +27,30 @@
       (.purgeInterval 2 TimeUnit/MINUTES)
       (.build)))
 
-(defn- record-request-metric [request-method request-path response-status request-time]
+(defn- record-request-metric [request-method response-status request-time]
   (let [status-label (str (int (/ response-status 100)) "XX")
         method-label (.toUpperCase (name request-method))]
     (-> (.newPartial @request-counter)
         (.labelPair "method" method-label)
         (.labelPair "status" status-label)
-        (.labelPair "path" request-path)
         (.apply)
         (.increment))
-    (-> (.newPartial @request-duration-counter)
-        (.labelPair "method" method-label)
-        (.labelPair "status" status-label)
-        (.labelPair "path" request-path)
-        (.apply)
-        (.increment (double request-time)))
     (-> (.newPartial @request-summary)
         (.labelPair "method" method-label)
         (.labelPair "status" status-label)
-        (.labelPair "path" request-path)
         (.apply)
         (.observe (double request-time)))))
 
 (defn instrument-handler [handler]
   "Ring middleware to record request metrics"
   (fn [request]
-    (let [request-path (:uri request)
-          request-method (:request-method request)
+    (let [request-method (:request-method request)
           start-time (System/currentTimeMillis)
           response (handler request)
           finish-time (System/currentTimeMillis)
           response-status (or (:status response) 404)
           request-time (- finish-time start-time)]
-      (record-request-metric request-method request-path response-status request-time)
+      (record-request-metric request-method response-status request-time)
       response)))
 
 (defn metrics-json []
@@ -100,5 +82,4 @@
   (Prometheus/defaultInitialize)
   (Prometheus/defaultAddPreexpositionHook (Hotspot.))
   (reset! request-counter (make-request-counter namespace))
-  (reset! request-duration-counter (make-request-duration-counter namespace))
   (reset! request-summary (make-request-summary namespace)))
