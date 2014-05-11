@@ -1,20 +1,22 @@
 .PHONY: all clean compile test deploy deps
 
+LEIN := ./lein
+
 all: clean compile test
 
 clean:
-	lein clean
+	${LEIN} clean
 	rm -f deps.txt
 	rm -f pom.xml*
 
 compile:
-	lein compile
+	${LEIN} compile
 
 test:
-	lein midje
+	${LEIN} midje
 
-deploy:
-	if test -n "$$BUILD_NUMBER"; then lein deploy clojars; else echo "BUILD_NUMBER not set!"; fi
+deploy: test
+	${LEIN} clojars
 
 deps:
-	lein deps :tree > deps.txt
+	${LEIN} deps :tree > deps.txt

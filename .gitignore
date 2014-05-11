@@ -8,6 +8,7 @@
 /checkouts
 /classes
 /target
+/vendor
 deps.txt
 pom.xml
 pom.xml.asc
