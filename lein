@@ -13,7 +13,7 @@ if [ ! -x $LEIN_BIN ]; then
 fi
 
 if [ "$1" == "clojars" ]; then
-  if [ -n "$BUILD_NUMBER"]; then
+  if [ -n "$BUILD_NUMBER" ]; then
     $LEIN_BIN deploy clojars
   else
     echo "BUILD_NUMBER not set!"
