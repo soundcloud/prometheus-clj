@@ -27,17 +27,19 @@
       (.purgeInterval 2 TimeUnit/MINUTES)
       (.build)))
 
-(defn- record-request-metric [request-method response-status request-time]
+(defn- record-request-metric [request-method response-status request-time response-path]
   (let [status-label (str (int (/ response-status 100)) "XX")
         method-label (.toUpperCase (name request-method))]
     (-> (.newPartial @request-counter)
         (.labelPair "method" method-label)
         (.labelPair "status" status-label)
+        (.labelPair "path" response-path)
         (.apply)
         (.increment))
     (-> (.newPartial @request-summary)
         (.labelPair "method" method-label)
         (.labelPair "status" status-label)
+        (.labelPair "path" response-path)
         (.apply)
         (.observe (double request-time)))))
 
@@ -48,11 +50,13 @@
           start-time (System/currentTimeMillis)
           response (handler request)
           finish-time (System/currentTimeMillis)
-          response-status (or (:status response) 404)
-          request-time (- finish-time start-time)]
-      (record-request-metric request-method response-status request-time)
+          request-time (- finish-time start-time)
+          response-status (get response :status 404)
+          response-path (get (meta response) :path "unspecified")]
+      (record-request-metric request-method response-status request-time response-path)
       response)))
 
+; adapted from https://github.com/prometheus/client_java/blob/master/utility/servlet/src/main/java/io/prometheus/client/utility/servlet/MetricsServlet.java
 (defn metrics-json []
   "Compojure handler to expose prometheus metrics in json format"
   (let [writer (StringWriter.)]
@@ -61,6 +65,7 @@
      :headers {"Content-Type" "application/json; schema=\"prometheus/telemetry\"; version=0.0.2"}
      :body    (.toString writer)}))
 
+; adapted from https://github.com/prometheus/client_java/blob/master/utility/servlet/src/main/java/io/prometheus/client/utility/servlet/MetricsServlet.java
 (defn metrics-proto []
   "Compojure handler to expose prometheus metrics in protocol buffer binary format"
   (let [output (ByteArrayOutputStream.)]
@@ -69,6 +74,7 @@
      :headers {"Content-Type" "application/vnd.google.protobuf; proto=\"io.prometheus.client.MetricFamily\"; encoding=\"delimited\""}
      :body    (ByteArrayInputStream. (.toByteArray output))}))
 
+; adapted from https://github.com/prometheus/client_java/blob/master/utility/servlet/src/main/java/io/prometheus/client/utility/servlet/MetricsServlet.java
 (defn accepts-proto-response [request]
   (let [accept-specs (Parser/parse (get-in request [:headers "accept"] ""))
         proto-params (some #(when (and (= (.getType %) "application") (= (.getSubtype %) "vnd.google.protobuf")) (.getParams %)) accept-specs)]

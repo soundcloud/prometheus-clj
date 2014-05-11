@@ -17,5 +17,4 @@
   (fact "should initialise the request counters and histograms"
     (prometheus/init! "test")
     (deref prometheus/request-counter) => not-nil?
-    (deref prometheus/request-duration-counter) => not-nil?
     (deref prometheus/request-summary) => not-nil?))
