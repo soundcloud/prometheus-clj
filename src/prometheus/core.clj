@@ -7,20 +7,20 @@
     (io.prometheus.client.utility.hotspot Hotspot)
     (java.io StringWriter ByteArrayOutputStream ByteArrayInputStream)))
 
-(def request-counter (atom nil))
-(def request-summary (atom nil))
+(def ^:private request-counter (atom nil))
+(def ^:private request-summary (atom nil))
 
-(defn- make-request-counter [namespace]
+(defn- make-request-counter [app-name]
   (-> (Counter/newBuilder)
-      (.namespace namespace)
+      (.namespace app-name)
       (.name "http_requests_total")
       (.labelNames (into-array String ["method" "status" "path"]))
       (.documentation "A counter of the total number of HTTP requests processed.")
       (.build)))
 
-(defn- make-request-summary [namespace]
+(defn- make-request-summary [app-name]
   (-> (Summary/newBuilder)
-      (.namespace namespace)
+      (.namespace app-name)
       (.name "http_request_durations_milliseconds")
       (.labelNames (into-array String ["method" "status" "path"]))
       (.documentation "A histogram of the response latency for HTTP requests (in milliseconds).")
@@ -84,8 +84,8 @@
   "Compojure handler to expose prometheus metrics in either protocol buffer binary or json format depending on the http request accept header"
   (if (accepts-proto-response request) (metrics-proto) (metrics-json)))
 
-(defn init! [namespace]
+(defn init! [app-name]
   (Prometheus/defaultInitialize)
   (Prometheus/defaultAddPreexpositionHook (Hotspot.))
-  (reset! request-counter (make-request-counter namespace))
-  (reset! request-summary (make-request-summary namespace)))
+  (reset! request-counter (make-request-counter app-name))
+  (reset! request-summary (make-request-summary app-name)))
