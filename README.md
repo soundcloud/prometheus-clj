@@ -6,7 +6,7 @@ A Clojure library designed to provide a wrapper to the [Prometheus](https://gith
 
 #### Leiningen
 
-prometheus-clj is available from Clojars.
+prometheus-clj is available from [Clojars](https://clojars.org/com.soundcloud/prometheus-clj).
 
 ![Clojars Project](http://clojars.org/com.soundcloud/prometheus-clj/latest-version.svg)
 
