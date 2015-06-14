@@ -16,5 +16,5 @@
 (facts "initialisation"
   (fact "should initialise the request counters and histograms"
     (prometheus/init! "test")
-    (deref prometheus/request-counter) => not-nil?
-    (deref prometheus/request-summary) => not-nil?))
+    @(#'prometheus/request-counter) => not-nil?
+    @(#'prometheus/request-summary) => not-nil?))

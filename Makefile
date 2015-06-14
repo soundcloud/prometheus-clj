@@ -1,16 +1,13 @@
-.PHONY: all clean compile test deploy deps
+.PHONY: all clean test deploy deps
 
 LEIN := ./lein
 
-all: clean compile test
+all: clean test
 
 clean:
 	${LEIN} clean
 	rm -f deps.txt
 	rm -f pom.xml*
-
-compile:
-	${LEIN} compile
 
 test:
 	${LEIN} midje
@@ -19,4 +16,4 @@ deploy: test
 	${LEIN} clojars
 
 deps:
-	${LEIN} deps :tree > deps.txt
+	${LEIN} with-profile production deps :tree &> deps.txt

@@ -7,12 +7,12 @@
   :license {:name "The Apache Software License, Version 2.0"
             :url  "http://www.apache.org/licenses/LICENSE-2.0.txt"}
 
-  :dependencies [[org.clojure/clojure "1.5.1"]
+  :dependencies [[org.clojure/clojure "1.6.0"]
                  [io.prometheus.client.utility/hotspot "0.0.4"]
                  [com.matttproud.accepts/accepts "0.0.2"]]
 
   :min-lein-version "2.0.0"
 
-  :profiles {:dev {:dependencies [[midje "1.5.1"]
+  :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [javax.servlet/servlet-api "2.5"]]
-                   :plugins      [[lein-midje "3.0.1"]]}})
+                   :plugins      [[lein-midje "3.1.3"]]}})
