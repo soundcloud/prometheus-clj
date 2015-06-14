@@ -11,7 +11,7 @@
                  [io.prometheus.client.utility/hotspot "0.0.4"]
                  [com.matttproud.accepts/accepts "0.0.2"]]
 
-  :min-lein-version "2.0.0"
+  :min-lein-version "2.4.3"
 
   :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [javax.servlet/servlet-api "2.5"]]
