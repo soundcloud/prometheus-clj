@@ -8,11 +8,12 @@
             :url  "http://www.apache.org/licenses/LICENSE-2.0.txt"}
 
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [io.prometheus.client.utility/hotspot "0.0.4"]
-                 [com.matttproud.accepts/accepts "0.0.2"]]
+                 [io.prometheus/simpleclient "0.0.10"]
+                 [io.prometheus/simpleclient_common "0.0.10"]]
 
   :min-lein-version "2.4.3"
 
   :profiles {:dev {:dependencies [[midje "1.6.3"]
+                                  [ring-mock "0.1.5"]
                                   [javax.servlet/servlet-api "2.5"]]
                    :plugins      [[lein-midje "3.1.3"]]}})

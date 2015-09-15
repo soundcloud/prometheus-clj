@@ -1,6 +1,6 @@
 # prometheus-clj
 
-A Clojure library designed to provide a wrapper to the [Prometheus](https://github.com/prometheus/client_java) java client.
+A Clojure library designed to provide ring/compojure wrappers for Prometheus [SimpleClient](https://github.com/prometheus/client_java) metrics.
 
 ## Installation
 
@@ -18,22 +18,16 @@ Require prometheus core.
 (:require [prometheus.core :as prometheus])
 ```
 
-Initialise prometheus client for your application's namespace.
-
-```clojure
-(prometheus/init! "application_name")
-```
-
 Wrap your ring handler so the prometheus client can start collecting metrics about your requests.
 
 ```clojure
-(prometheus/instrument-handler handler)
+(prometheus/instrument-handler handler your-app-name your-prometheus-collector-registry)
 ```
 
 Create a compojure route so that the prometheus server can poll your application for metrics.
 
 ```clojure
-(GET "/metrics" request (prometheus/metrics request))
+(GET "/metrics" [] (prometheus/dump-metrics your-prometheus-collector-registry))
 ```
 
 ## License

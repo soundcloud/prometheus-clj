@@ -1,20 +1,20 @@
 (ns prometheus.unit.t_core
   (:require
     [midje.sweet :refer :all]
-    [prometheus.core :as prometheus]))
+    [ring.mock.request :as ring]
+    [prometheus.core :as prometheus])
+  (:import (io.prometheus.client CollectorRegistry)
+           (io.prometheus.client.exporter.common TextFormat)))
 
-(def not-nil? (complement nil?))
+(def test-response (with-meta {:status 200 :body "ok"} {:path "/test"}))
 
-(facts "content negotiation"
-  (fact "accepts prometheus protobuf requests"
-    (let [request {:headers {"accept" "application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited;q=0.7,application/json;schema=prometheus/telemetry;version=0.0.2;q=0.2,*/*;q=0.1"}}]
-      (prometheus/accepts-proto-response request) => TRUTHY))
-  (fact "rejects any other request"
-    (let [request {:headers {"accept" "*/*"}}]
-      (prometheus/accepts-proto-response request) => FALSEY)))
-
-(facts "initialisation"
-  (fact "should initialise the request counters and histograms"
-    (prometheus/init! "test")
-    @(#'prometheus/request-counter) => not-nil?
-    @(#'prometheus/request-summary) => not-nil?))
+(facts "metrics export"
+  (let [registry (CollectorRegistry.)
+        handler (prometheus/instrument-handler (constantly test-response) "test" registry)
+        response (handler (ring/request :get "/test"))
+        metrics (prometheus/dump-metrics registry)]
+    (fact "handler returns delegate's response"
+      response => {:status 200 :body "ok"})
+    (fact "metrics should be a ring response"
+      (:status metrics) => 200
+      (get-in metrics [:headers "Content-Type"]) => TextFormat/CONTENT_TYPE_004)))
