@@ -5,7 +5,7 @@
     (io.prometheus.client Counter Histogram CollectorRegistry)))
 
 ; more useful set of buckets for microservice APIs than the defaults provided by the Histogram class
-(def histogram-buckets (atom [0.001, 0.002, 0.005, 0.010, 0.025, 0.050, 0.100, 0.250, 0.500, 0.750, 1.0]))
+(def histogram-buckets (atom [0.001, 0.005, 0.010, 0.020, 0.050, 0.100, 0.200, 0.300, 0.500, 0.750, 1, 5]))
 
 (defn- make-request-counter [app-name registry]
   (-> (Counter/build)
