@@ -15,9 +15,9 @@
 (defn- make-request-histogram [app-name registry]
   (-> (Histogram/build)
       (.namespace app-name)
-      (.name "http_request_durations_milliseconds")
+      (.name "http_request_latency_seconds")
       (.labelNames (into-array String ["method" "status" "path"]))
-      (.help "A histogram of the response latency for HTTP requests (in milliseconds).")
+      (.help "A histogram of the response latency for HTTP requests in seconds.")
       (.register registry)))
 
 (defn- record-request-metric [counter histogram request-method response-status request-time response-path]
@@ -27,7 +27,7 @@
     (-> (.labels counter labels)
         (.inc))
     (-> (.labels histogram labels)
-        (.observe (double request-time)))))
+        (.observe request-time))))
 
 (defn instrument-handler [handler ^String app-name ^CollectorRegistry registry]
   "Ring middleware to record request metrics"
@@ -38,9 +38,9 @@
             start-time (System/currentTimeMillis)
             response (handler request)
             finish-time (System/currentTimeMillis)
-            request-time (- finish-time start-time)
             response-status (get response :status 404)
-            response-path (get (meta response) :path "unspecified")]
+            response-path (get (meta response) :path "unspecified")
+            request-time (/ (double (- finish-time start-time)) 1000.0)]
         (record-request-metric counter histogram request-method response-status request-time response-path)
         response))))
 
