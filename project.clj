@@ -1,4 +1,4 @@
-(def build-version (or (System/getenv "BUILD_NUMBER") "1.1-SNAPSHOT"))
+(def build-version (or (System/getenv "BUILD_NUMBER") "2.1-SNAPSHOT"))
 
 (defproject com.soundcloud/prometheus-clj build-version
   :description "Clojure wrappers for the Prometheus java client"
