@@ -6,11 +6,14 @@
   (:import (io.prometheus.client CollectorRegistry)
            (io.prometheus.client.exporter.common TextFormat)))
 
-(def test-response (with-meta {:status 200 :body "ok"} {:path "/test"}))
+(defn test-handler [_]
+  (with-meta
+    {:status 200 :body "ok"}
+    {:path "/test"}))
 
 (facts "metrics export"
   (let [registry (CollectorRegistry.)
-        handler (prometheus/instrument-handler (constantly test-response) "test" registry)
+        handler (prometheus/instrument-handler test-handler "test" registry)
         response (handler (ring/request :get "/test"))
         metrics (prometheus/dump-metrics registry)]
     (fact "handler returns delegate's response"
