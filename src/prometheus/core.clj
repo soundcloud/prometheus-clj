@@ -4,6 +4,9 @@
     (io.prometheus.client.exporter.common TextFormat)
     (io.prometheus.client Counter Histogram CollectorRegistry)))
 
+; more useful set of buckets for microservice APIs than the defaults provided by the Histogram class
+(def histogram-buckets (atom [0.001, 0.002, 0.005, 0.010, 0.025, 0.050, 0.100, 0.250, 0.500, 0.750, 1.0]))
+
 (defn- make-request-counter [app-name registry]
   (-> (Counter/build)
       (.namespace app-name)
@@ -18,6 +21,7 @@
       (.name "http_request_latency_seconds")
       (.labelNames (into-array String ["method" "status" "path"]))
       (.help "A histogram of the response latency for HTTP requests in seconds.")
+      (.buckets (double-array @histogram-buckets))
       (.register registry)))
 
 (defn- record-request-metric [counter histogram request-method response-status request-time response-path]
