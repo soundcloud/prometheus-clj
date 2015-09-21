@@ -1,5 +1,6 @@
 (ns prometheus.core
   (:import
+    (clojure.lang IObj)
     (java.io StringWriter)
     (io.prometheus.client.exporter.common TextFormat)
     (io.prometheus.client Counter Histogram CollectorRegistry)))
@@ -33,8 +34,19 @@
     (-> (.labels histogram labels)
         (.observe request-time))))
 
-(defn instrument-handler [handler ^String app-name ^CollectorRegistry registry]
+(defn with-path
+  "Adds the matched compojure route as the :path response metadata attribute"
+  [request response]
+  (if-let [route (last (:compojure/route request))]
+    (if (instance? IObj response)
+      (let [response-meta (or (meta response) {})]
+        (with-meta response (assoc response-meta :path route)))
+      response)
+    response))
+
+(defn instrument-handler
   "Ring middleware to record request metrics"
+  [handler ^String app-name ^CollectorRegistry registry]
   (let [counter (make-request-counter app-name registry)
         histogram (make-request-histogram app-name registry)]
     (fn [request]
@@ -48,8 +60,9 @@
         (record-request-metric counter histogram request-method response-status request-time response-path)
         response))))
 
-(defn dump-metrics [^CollectorRegistry registry]
-  "Compojure handler to expose prometheus metrics using simple client's text format"
+(defn dump-metrics
+  "Ring handler to expose prometheus metrics using simple client's text format"
+  [^CollectorRegistry registry]
   (let [writer (StringWriter.)]
     (TextFormat/write004 writer (.metricFamilySamples registry))
     {:status  200
