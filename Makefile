@@ -10,7 +10,7 @@ clean:
 	rm -f pom.xml*
 
 test:
-	${LEIN} midje
+	${LEIN} test
 
 deploy: test
 	${LEIN} clojars
