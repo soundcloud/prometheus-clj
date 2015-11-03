@@ -1,4 +1,6 @@
 (ns prometheus.core
+  (:require
+    [clojure.string :as string])
   (:import
     (clojure.lang IObj)
     (java.io StringWriter)
@@ -12,7 +14,7 @@
   (-> (Counter/build)
       (.namespace app-name)
       (.name "http_requests_total")
-      (.labelNames (into-array String ["method" "status" "path"]))
+      (.labelNames (into-array String ["method" "status" "statusClass" "path"]))
       (.help "A counter of the total number of HTTP requests processed.")
       (.register registry)))
 
@@ -21,7 +23,7 @@
       (.buckets (double-array @histogram-buckets))
       (.namespace app-name)
       (.name "http_request_latency_seconds")
-      (.labelNames (into-array String ["method" "status" "path"]))
+      (.labelNames (into-array String ["method" "status" "statusClass" "path"]))
       (.help "A histogram of the response latency for HTTP requests in seconds.")
       (.register registry)))
 
@@ -30,9 +32,9 @@
 (defn- ^Histogram$Child histogram-with-labels [^Histogram histogram label-array] (.labels histogram label-array))
 
 (defn- record-request-metric [counter histogram request-method response-status request-time response-path]
-  (let [method-label (.toUpperCase (name request-method))
-        status-label (str (int (/ response-status 100)) "XX")
-        labels (into-array String [method-label status-label response-path])]
+  (let [status-class (str (int (/ response-status 100)) "XX")
+        method-label (string/upper-case (name request-method))
+        labels (into-array String [method-label (str response-status) status-class response-path])]
     (-> (histogram-with-labels histogram labels) (.observe request-time))
     (-> (counter-with-labels counter labels) (.inc))))
 
