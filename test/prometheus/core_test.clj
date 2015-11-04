@@ -7,16 +7,13 @@
     (io.prometheus.client CollectorRegistry)
     (io.prometheus.client.exporter.common TextFormat)))
 
-(defn test-handler [_]
-  (with-meta
-    {:status 200 :body "ok"}
-    {:path "`/test"}))
+(defn test-handler [request]
+  (prometheus/with-path request {:status 200 :body "ok"}))
 
 (deftest dump-metrics
   (let [registry (CollectorRegistry.)
-        request (ring/request :get "/test")
         handler (prometheus/instrument-handler test-handler "test" registry)
-        response (prometheus/with-path request (handler request))
+        response (handler (assoc (ring/request :get "/test") :compojure/route ["GET" "/test"]))
         metrics (prometheus/dump-metrics registry)]
     (testing "handler returns delegate's response"
       (is (= {:status 200 :body "ok"} response)))
@@ -24,4 +21,5 @@
       (is (= 200 (:status metrics)))
       (is (= TextFormat/CONTENT_TYPE_004 (get-in metrics [:headers "Content-Type"])))
       (is (.contains (:body metrics) "http_request_latency_seconds"))
-      (is (.contains (:body metrics) "http_requests_total")))))
+      (is (.contains (:body metrics) "http_requests_total"))
+      (is (.contains (:body metrics) "/test")))))
