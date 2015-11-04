@@ -22,5 +22,6 @@
       (is (= {:status 200 :body "ok"} response)))
     (testing "metrics should be a ring response"
       (is (= 200 (:status metrics)))
-      (is (= TextFormat/CONTENT_TYPE_004
-             (get-in metrics [:headers "Content-Type"]))))))
+      (is (= TextFormat/CONTENT_TYPE_004 (get-in metrics [:headers "Content-Type"])))
+      (is (.contains (:body metrics) "http_request_latency_seconds"))
+      (is (.contains (:body metrics) "http_requests_total")))))
