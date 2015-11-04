@@ -14,11 +14,12 @@
 
 (deftest dump-metrics
   (let [registry (CollectorRegistry.)
+        request (ring/request :get "/test")
         handler (prometheus/instrument-handler test-handler "test" registry)
-        response (handler (ring/request :get "/test"))
+        response (prometheus/with-path request (handler request))
         metrics (prometheus/dump-metrics registry)]
     (testing "handler returns delegate's response"
-      (is (= response {:status 200 :body "ok"})))
+      (is (= {:status 200 :body "ok"} response)))
     (testing "metrics should be a ring response"
       (is (= 200 (:status metrics)))
       (is (= TextFormat/CONTENT_TYPE_004
