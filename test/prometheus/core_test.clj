@@ -13,7 +13,7 @@
 (deftest dump-metrics
   (let [registry (CollectorRegistry.)
         handler (prometheus/instrument-handler test-handler "test" registry)
-        response (handler (assoc (ring/request :get "/test") :compojure/route ["GET" "/test"]))
+        response (handler (assoc (ring/request :get "/test-path") :compojure/route ["GET" "/test-path"]))
         metrics (prometheus/dump-metrics registry)]
     (testing "handler returns delegate's response"
       (is (= {:status 200 :body "ok"} response)))
@@ -22,4 +22,4 @@
       (is (= TextFormat/CONTENT_TYPE_004 (get-in metrics [:headers "Content-Type"])))
       (is (.contains (:body metrics) "http_request_latency_seconds"))
       (is (.contains (:body metrics) "http_requests_total"))
-      (is (.contains (:body metrics) "/test")))))
+      (is (.contains (:body metrics) "/test-path")))))
