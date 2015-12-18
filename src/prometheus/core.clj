@@ -62,21 +62,25 @@
 
 (defn increase-counter
   "Increase the value of a registered counter."
-  [store namespace metric & {:keys [amount labels] :or {amount 1.0 labels []}}]
-  (-> (counter-with-labels (get-in store [:metrics namespace metric]) labels)
-      (.inc amount)))
+  ([store namespace metric] (increase-counter store namespace metric [] 1.0))
+  ([store namespace metric labels] (increase-counter store namespace metric labels 1.0))
+  ([store namespace metric labels amount]
+   (-> (counter-with-labels (get-in store [:metrics namespace metric]) labels)
+       (.inc amount))))
 
 (defn set-gauge
   "Set the value of a registered gauge."
-  [store namespace metric value & {:keys [labels] :or {labels []}}]
-  (-> (gauge-with-labels (get-in store [:metrics namespace metric]) labels)
-      (.set value)))
+  ([store namespace metric value] (set-gauge store namespace metric value []))
+  ([store namespace metric value labels]
+   (-> (gauge-with-labels (get-in store [:metrics namespace metric]) labels)
+       (.set value))))
 
 (defn track-observation
   "Track the value of an observation for a registered histogram."
-  [store namespace metric value & {:keys [labels] :or {labels []}}]
-  (-> (histogram-with-labels (get-in store [:metrics namespace metric]) labels)
-      (.observe value)))
+  ([store namespace metric value] (track-observation store namespace metric value []))
+  ([store namespace metric value labels]
+   (-> (histogram-with-labels (get-in store [:metrics namespace metric]) labels)
+       (.observe value))))
 
 (defn init-defaults
   "Initialize the metrics system with defaults."
@@ -99,7 +103,7 @@
         method-label (string/upper-case (name request-method))
         labels [method-label (str response-status) status-class response-path]]
     (track-observation metrics-store app-name "http_request_latency_seconds" request-time labels)
-    (increase-counter metrics-store app-name "http_requests_total")))
+    (increase-counter metrics-store app-name "http_requests_total" labels)))
 
 (defn instrument-handler
   "Ring middleware to record request metrics"
