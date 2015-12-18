@@ -17,4 +17,5 @@
 
   ;:global-vars {*warn-on-reflection* true}
 
-  :profiles {:dev {:dependencies [[ring-mock "0.1.5"]]}})
+  :profiles {:dev {:dependencies [[ring-mock "0.1.5"]
+                                  [ring-server "0.4.0"]]}})
