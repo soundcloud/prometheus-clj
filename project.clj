@@ -8,8 +8,8 @@
             :url  "http://www.apache.org/licenses/LICENSE-2.0.txt"}
 
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [io.prometheus/simpleclient "0.0.10"]
-                 [io.prometheus/simpleclient_common "0.0.10"]]
+                 [io.prometheus/simpleclient "0.0.11"]
+                 [io.prometheus/simpleclient_common "0.0.11"]]
 
   :min-lein-version "2.4.3"
 
