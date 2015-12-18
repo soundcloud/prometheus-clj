@@ -6,6 +6,7 @@
     (java.io StringWriter)
     (io.prometheus.client.hotspot DefaultExports)
     (io.prometheus.client.exporter.common TextFormat)
+    (io.prometheus.client.exporter PushGateway)
     (io.prometheus.client Counter Histogram Counter$Child Histogram$Child CollectorRegistry Gauge Gauge$Child)))
 
 ; more useful set of buckets for microservice APIs than the defaults provided by the Histogram class
@@ -134,3 +135,8 @@
     {:status  200
      :headers {"Content-Type" TextFormat/CONTENT_TYPE_004}
      :body    (.toString writer)}))
+
+(defn push-metrics!
+  "Push metrics to the Prometheus push gateway."
+  [^CollectorRegistry registry ^String hostname ^String job-name]
+  (doto (PushGateway. hostname) (.pushAdd registry job-name)))
