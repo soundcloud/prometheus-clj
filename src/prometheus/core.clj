@@ -4,6 +4,7 @@
   (:import
     (clojure.lang IObj)
     (java.io StringWriter)
+    (io.prometheus.client.hotspot DefaultExports)
     (io.prometheus.client.exporter.common TextFormat)
     (io.prometheus.client Counter Histogram Counter$Child Histogram$Child CollectorRegistry Gauge Gauge$Child)))
 
@@ -99,6 +100,12 @@
   [store namespace metric value & {:keys [labels] :or {labels []}}]
   (-> (histogram-with-labels (get-in store [:metrics namespace metric]) labels)
       (.observe value)))
+
+(defn init-defaults
+  "Initialize the metrics system with defaults."
+  []
+  (DefaultExports/initialize)
+  {:registry (CollectorRegistry/defaultRegistry)})
 
 (defn with-path
   "Adds the matched compojure route as the :path response metadata attribute"
