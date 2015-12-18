@@ -34,13 +34,6 @@
 
 (defn- ^Histogram$Child histogram-with-labels [^Histogram histogram label-array] (.labels histogram (into-array String label-array)))
 
-(defn- record-request-metric [counter histogram request-method response-status request-time response-path]
-  (let [status-class (str (int (/ response-status 100)) "XX")
-        method-label (string/upper-case (name request-method))
-        labels [method-label (str response-status) status-class response-path]]
-    (-> (histogram-with-labels histogram labels) (.observe request-time))
-    (-> (counter-with-labels counter labels) (.inc))))
-
 (defn- ^Counter make-counter [^CollectorRegistry registry namespace metric help label-names]
   (-> (Counter/build)
       (.namespace namespace)
@@ -66,27 +59,15 @@
       (.help help)
       (.register registry)))
 
-(defn set-gauge
-  "Set the value of a registered gauge."
-  [store namespace metric value & {:keys [labels] :or {labels []}}]
-  (-> (gauge-with-labels (get-in store [:metrics namespace metric]) labels)
-      (.set value)))
-
-(defn register-gauge
-  "Registers a gauge to the store and returns the new store."
-  [store namespace metric help label-names]
-  (assoc-in store [:metrics namespace metric] (make-gauge (:registry store) namespace metric help label-names)))
-
 (defn register-counter
   "Registers a counter to the store and returns the new store."
   [store namespace metric help label-names]
   (assoc-in store [:metrics namespace metric] (make-counter (:registry store) namespace metric help label-names)))
 
-(defn increase-counter
-  "Increase the value of a registered counter."
-  [store namespace metric & {:keys [amount labels] :or {amount 1.0 labels []}}]
-  (-> (counter-with-labels (get-in store [:metrics namespace metric]) labels)
-      (.inc amount)))
+(defn register-gauge
+  "Registers a gauge to the store and returns the new store."
+  [store namespace metric help label-names]
+  (assoc-in store [:metrics namespace metric] (make-gauge (:registry store) namespace metric help label-names)))
 
 (defn register-histogram
   "Registers a histogram to the store and returns the new store."
@@ -94,6 +75,18 @@
   (assoc-in store
             [:metrics namespace metric]
             (make-histogram (:registry store) namespace metric help label-names buckets)))
+
+(defn increase-counter
+  "Increase the value of a registered counter."
+  [store namespace metric & {:keys [amount labels] :or {amount 1.0 labels []}}]
+  (-> (counter-with-labels (get-in store [:metrics namespace metric]) labels)
+      (.inc amount)))
+
+(defn set-gauge
+  "Set the value of a registered gauge."
+  [store namespace metric value & {:keys [labels] :or {labels []}}]
+  (-> (gauge-with-labels (get-in store [:metrics namespace metric]) labels)
+      (.set value)))
 
 (defn track-observation
   "Track the value of an observation for a registered histogram."
@@ -116,6 +109,13 @@
         (with-meta response (assoc response-meta :path route)))
       response)
     response))
+
+(defn- record-request-metric [counter histogram request-method response-status request-time response-path]
+  (let [status-class (str (int (/ response-status 100)) "XX")
+        method-label (string/upper-case (name request-method))
+        labels [method-label (str response-status) status-class response-path]]
+    (-> (histogram-with-labels histogram labels) (.observe request-time))
+    (-> (counter-with-labels counter labels) (.inc))))
 
 (defn instrument-handler
   "Ring middleware to record request metrics"
