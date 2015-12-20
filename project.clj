@@ -9,10 +9,13 @@
 
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [io.prometheus/simpleclient "0.0.11"]
-                 [io.prometheus/simpleclient_common "0.0.11"]]
+                 [io.prometheus/simpleclient_hotspot "0.0.11"]
+                 [io.prometheus/simpleclient_common "0.0.11"]
+                 [io.prometheus/simpleclient_pushgateway "0.0.11"]]
 
   :min-lein-version "2.4.3"
 
   ;:global-vars {*warn-on-reflection* true}
 
-  :profiles {:dev {:dependencies [[ring-mock "0.1.5"]]}})
+  :profiles {:dev {:dependencies [[ring-mock "0.1.5"]
+                                  [ring-server "0.4.0"]]}})

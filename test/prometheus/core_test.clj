@@ -23,3 +23,33 @@
       (is (.contains (:body metrics) "http_request_latency_seconds"))
       (is (.contains (:body metrics) "http_requests_total"))
       (is (.contains (:body metrics) "/test-path")))))
+
+(deftest custom-metrics
+  (let [registry (CollectorRegistry.)
+        store {:registry registry}]
+    (testing "adds a custom counter"
+      (let [store (prometheus/register-counter store "test" "my_custom_counter" "some counter" ["foo"])]
+        (prometheus/increase-counter store "test" "my_custom_counter" ["bar"])
+        (is (.contains (:body (prometheus/dump-metrics registry)) "test_my_custom_counter"))))
+    (testing "adds a custom gauge"
+      (let [store (prometheus/register-gauge store "test" "my_custom_gauge" "some gauge" ["foo"])]
+        (prometheus/set-gauge store "test" "my_custom_gauge" 101 ["bar"])
+        (is (.contains (:body (prometheus/dump-metrics (:registry store)))
+                       "test_my_custom_gauge{foo=\"bar\",} 101.0"))))
+    (testing "adds a custom histogram"
+      (let [store (prometheus/register-histogram
+                    store
+                    "test"
+                    "my_custom_histogram"
+                    "some histogram"
+                    ["foo"]
+                    [10 90 100])]
+        (prometheus/track-observation store "test" "my_custom_histogram" 87 ["bar"])
+        (is (.contains (:body (prometheus/dump-metrics registry))
+                       "test_my_custom_histogram_bucket{foo=\"bar\",le=\"90.0\",} 1.0"))
+        (is (.contains (:body (prometheus/dump-metrics registry))
+                       "test_my_custom_histogram_bucket{foo=\"bar\",le=\"100.0\",} 1.0"))
+        (is (.contains (:body (prometheus/dump-metrics registry))
+                       "test_my_custom_histogram_sum{foo=\"bar\",} 87.0"))
+        (is (.contains (:body (prometheus/dump-metrics registry))
+                       "test_my_custom_histogram_count{foo=\"bar\",} 1.0"))))))
