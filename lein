@@ -12,13 +12,4 @@ if [ ! -x $LEIN_BIN ]; then
   chmod +x $LEIN_BIN
 fi
 
-if [ "$1" == "clojars" ]; then
-  if [ -n "$BUILD_NUMBER" ]; then
-    $LEIN_BIN deploy clojars
-  else
-    echo "BUILD_NUMBER not set!"
-    exit 1
-  fi
-else
-  $LEIN_BIN $@
-fi
+$LEIN_BIN $@

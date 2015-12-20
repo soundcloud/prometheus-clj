@@ -13,7 +13,7 @@ test:
 	${LEIN} test
 
 deploy: test
-	${LEIN} clojars
+	${LEIN} deploy clojars
 
 deps:
 	${LEIN} with-profile production deps :tree &> deps.txt
