@@ -142,5 +142,6 @@
 
 (defn push-metrics!
   "Push metrics to the Prometheus push gateway."
-  [^CollectorRegistry registry ^String hostname ^String job-name]
-  (doto (PushGateway. hostname) (.pushAdd registry job-name)))
+  ([^CollectorRegistry registry ^String hostname ^String job-name] (push-metrics! registry hostname job-name {}))
+  ([^CollectorRegistry registry ^String hostname ^String job-name grouping-keys]
+   (doto (PushGateway. hostname) (.pushAdd registry job-name grouping-keys))))
