@@ -5,11 +5,11 @@
   :license {:name "The Apache Software License, Version 2.0"
             :url  "http://www.apache.org/licenses/LICENSE-2.0.txt"}
 
-  :dependencies [[org.clojure/clojure "1.7.0"]
-                 [io.prometheus/simpleclient "0.0.11"]
-                 [io.prometheus/simpleclient_hotspot "0.0.11"]
-                 [io.prometheus/simpleclient_common "0.0.11"]
-                 [io.prometheus/simpleclient_pushgateway "0.0.11"]]
+  :dependencies [[org.clojure/clojure "1.8.0"]
+                 [io.prometheus/simpleclient "0.0.14"]
+                 [io.prometheus/simpleclient_hotspot "0.0.14"]
+                 [io.prometheus/simpleclient_common "0.0.14"]
+                 [io.prometheus/simpleclient_pushgateway "0.0.14"]]
 
   :min-lein-version "2.4.3"
 
