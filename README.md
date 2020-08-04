@@ -1,6 +1,6 @@
 # prometheus-clj
 
-A Clojure library designed to provide ring/compojure wrappers for Prometheus [SimpleClient](https://github.com/prometheus/client_java) metrics.
+> :warning: **Archived**: This prometheus-clj project isn't longer maintained by SoundCloud. Check out [iapetos](https://github.com/clj-commons/iapetos) for an actively maintained Clojure wrapper around the official [Prometheus Java Client](https://github.com/prometheus/client_java).
 
 ## Installation
 
